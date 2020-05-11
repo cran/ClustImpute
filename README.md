@@ -3,16 +3,23 @@
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/o1iv3r/ClustImpute.svg?branch=master)](https://travis-ci.org/o1iv3r/ClustImpute)
 [![Codecov test coverage](https://codecov.io/gh/o1iv3r/ClustImpute/branch/master/graph/badge.svg)](https://codecov.io/gh/o1iv3r/ClustImpute?branch=master)
+![CRAN_Version](https://www.r-pkg.org/badges/version-last-release/ClustImpute)
+![CRAN_Downloads](https://cranlogs.r-pkg.org/badges/grand-total/ClustImpute)
+![CRAN_Downloads_LastWeek](https://cranlogs.r-pkg.org/badges/last-week/ClustImpute)
+![Repo_status](https://www.repostatus.org/badges/latest/active.svg)
+![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
+![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)
 <!-- badges: end -->
 
 
-ClustImpute features a k-means clustering algorithm that includes a powerful iterative multiple missing data imputation method. Why is this relevant? Often a clustering based on median or random imputation will not provide good results even if we Ã¢â‚¬Å“knowÃ¢â‚¬Â the number of clusters. Both approaches badly distort the data set below and lead to bad clusters:
 
-![*Comparison of median with random imputation.*](Median_random_imp.png)
+ClustImpute features a k-means clustering algorithm that includes a powerful iterative multiple missing data imputation method. Why is this relevant? Often a clustering based on median or random imputation will not provide good results even if we know the number of clusters. Both approaches badly distort the data set below and lead to bad clusters:
+
+![*Comparison of median with random imputation.*](man/figures/Median_random_imp.png)
 
 ClustImpute draws missing values iteratively based on the current cluster assignment so that correlations are considered. Subsequently, penalizing weights are imposed on imputed values and successively decreased (to zero) as the missing data imputation gets better.The algorithm is computationally efficient since the imputation is only as accurate as the clustering, and will be much faster than any approach that derives the full conditional missing distribution independently of the clustering.
 
-![*ClustImpute vs. a clustering based on random imputation.*](ClustImpute_vs_random_imputation.png)
+![*ClustImpute vs. a clustering based on random imputation.*](man/figures/ClustImpute_vs_random_imputation.png)
 
 
 ## Installation
