@@ -26,7 +26,11 @@ dat<- as.data.frame(scale(dat)) # scaling
 summary(dat)
 
 ## -----------------------------------------------------------------------------
-plot(dat$x,dat$y)
+library(ggExtra)
+dat4plot <- dat
+dat4plot$true_clust_fct <- factor(true_clust)
+p_base <- ggplot(dat4plot,aes(x=x,y=y,color=true_clust_fct)) + geom_point()
+ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 dat_with_miss <- miss_sim(dat,p=.2,seed_nr=120)
@@ -42,7 +46,8 @@ for (j in 1:dim(dat)[2]) {
   dat_median_imp[,j] <- Hmisc::impute(dat_median_imp[,j],fun=median)
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
-ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
+p_median_imp <- ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
+ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 dat_random_imp <- dat_with_miss
@@ -50,14 +55,16 @@ for (j in 1:dim(dat)[2]) {
   dat_random_imp[,j] <- impute(dat_random_imp[,j],fun="random")
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
-ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
+p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
+ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 tic("Clustering based on random imputation")
 cl_compare <- KMeans_arma(data=dat_random_imp,clusters=3,n_iter=100,seed=751)
 toc()
 dat_random_imp$pred <- predict_KMeans(dat_random_imp,cl_compare)
-ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
+p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
+ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 nr_iter <- 10 # iterations of procedure
@@ -72,7 +79,8 @@ toc()
 str(res)
 
 ## -----------------------------------------------------------------------------
-ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
+p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
+ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 res2 <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end,seed_nr = 2)
@@ -87,20 +95,6 @@ sd_all <- cbind(sd_all,seed=rep(c(150519,2,3),each=11))
 ## -----------------------------------------------------------------------------
 ggplot(as.data.frame(mean_all)) + geom_line(aes(x=iter,y=V1,color=factor(seed))) + ggtitle("Mean")
 ggplot(as.data.frame(sd_all)) + geom_line(aes(x=iter,y=V1,color=factor(seed))) + ggtitle("Std. dev.")
-
-## -----------------------------------------------------------------------------
-dat4plot <- dat
-dat4plot$true_clust <- true_clust
-Xfinal <- res$complete_data
-Xfinal$pred <- res$clusters
-
-par(mfrow=c(1,2))
-violinBy(dat4plot,"x","true_clust",main="Original data")
-violinBy(dat4plot,"y","true_clust",main="Original data")
-violinBy(Xfinal,"x","pred",main="imputed data")
-violinBy(Xfinal,"y","pred",main="imputed data")
-violinBy(dat_random_imp,"x","pred",main="random imputation")
-violinBy(dat_random_imp,"y","pred",main="random imputation")
 
 ## -----------------------------------------------------------------------------
 external_validation(true_clust, res$clusters)
