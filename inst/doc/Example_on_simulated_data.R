@@ -75,12 +75,20 @@ tic("Run ClustImpute")
 res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
 toc()
 
-## -----------------------------------------------------------------------------
-str(res)
+## ----eval=FALSE---------------------------------------------------------------
+#  res
+#  summary(res)
+#  attributes(res)
 
 ## -----------------------------------------------------------------------------
 p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
 ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
+
+## ----fig.width=10, fig.height=7-----------------------------------------------
+plot(res)+xlim(-2.5,2.5)
+
+## ----fig.width=10, fig.height=7-----------------------------------------------
+plot(res, type="box")
 
 ## -----------------------------------------------------------------------------
 res2 <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end,seed_nr = 2)
