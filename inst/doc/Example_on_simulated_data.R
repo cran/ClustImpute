@@ -6,9 +6,8 @@ knitr::opts_chunk$set(
   fig.height = 5
 )
 
-## ----setup, include = FALSE---------------------------------------------------
-library(ClustImpute)
-required_packages <- Hmisc::Cs(psych,ggplot2,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr,corrplot)
+## ----setup, warning=FALSE, message=FALSE--------------------------------------
+required_packages <- Hmisc::Cs(psych,ggplot2,ggExtra,tidyr,Hmisc,tictoc,ClusterR,copula,dplyr,corrplot,ClustImpute)
 lapply(required_packages, require, character.only = TRUE)
 
 ## -----------------------------------------------------------------------------
@@ -26,11 +25,10 @@ dat<- as.data.frame(scale(dat)) # scaling
 summary(dat)
 
 ## -----------------------------------------------------------------------------
-library(ggExtra)
 dat4plot <- dat
 dat4plot$true_clust_fct <- factor(true_clust)
 p_base <- ggplot(dat4plot,aes(x=x,y=y,color=true_clust_fct)) + geom_point()
-ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_base, groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 dat_with_miss <- miss_sim(dat,p=.2,seed_nr=120)
@@ -38,7 +36,7 @@ summary(dat_with_miss)
 mis_ind <- is.na(dat_with_miss) # missing indicator
 
 ## -----------------------------------------------------------------------------
-corrplot(cor(mis_ind),method="number")
+corrplot::corrplot(cor(mis_ind),method="number")
 
 ## -----------------------------------------------------------------------------
 dat_median_imp <- dat_with_miss
@@ -47,7 +45,7 @@ for (j in 1:dim(dat)[2]) {
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
 p_median_imp <- ggplot(dat_median_imp) + geom_point(aes(x=x,y=y,color=imp))
-ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_median_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 dat_random_imp <- dat_with_miss
@@ -56,24 +54,24 @@ for (j in 1:dim(dat)[2]) {
 }
 imp <- factor(pmax(mis_ind[,5],mis_ind[,6]),labels=c("Original","Imputed")) # point is imputed if x or y is imputed
 p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=imp))
-ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
-tic("Clustering based on random imputation")
+tictoc::tic("Clustering based on random imputation")
 cl_compare <- KMeans_arma(data=dat_random_imp,clusters=3,n_iter=100,seed=751)
-toc()
+tictoc::toc()
 dat_random_imp$pred <- predict_KMeans(dat_random_imp,cl_compare)
 p_random_imp <- ggplot(dat_random_imp) + geom_point(aes(x=x,y=y,color=factor(pred)))
-ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_random_imp,groupColour = TRUE, groupFill = TRUE)
 
 ## -----------------------------------------------------------------------------
 nr_iter <- 10 # iterations of procedure
 n_end <- 10 # step until convergence of weight function to 1
 nr_cluster <- 3 # number of clusters
 c_steps <- 50 # numer of cluster steps per iteration
-tic("Run ClustImpute")
+tictoc::tic("Run ClustImpute")
 res <- ClustImpute(dat_with_miss,nr_cluster=nr_cluster, nr_iter=nr_iter, c_steps=c_steps, n_end=n_end) 
-toc()
+tictoc::toc()
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  res
@@ -82,7 +80,7 @@ toc()
 
 ## -----------------------------------------------------------------------------
 p_clustimpute <- ggplot(res$complete_data,aes(x,y,color=factor(res$clusters))) + geom_point()
-ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
+ggExtra::ggMarginal(p_clustimpute,groupColour = TRUE, groupFill = TRUE)
 
 ## ----fig.width=10, fig.height=7-----------------------------------------------
 plot(res)+xlim(-2.5,2.5)
